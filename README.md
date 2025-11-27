@@ -13,12 +13,12 @@ This repository provides a **concise and readable implementation** of "Parallax-
 
 ## Results
 
-|   datasets   |    global homography  |  Robust Elastic Warping(REW)   |
-| :-: | :-- |:-- |
-|intersection | <img src="two_views/intersection/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/intersection/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |
-|park | <img src="two_views/park/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/park/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |
-|railtracks | <img src="two_views/railtracks/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/railtracks/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |
-|worktable | <img src="two_views/worktable/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/worktable/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |
+|   datasets   |    global homography  |  Robust Elastic Warping(REW)   |Robust Elastic Warping(REW) With Similarity   |
+| :-: | :-- |:-- |:-- |
+|intersection | <img src="two_views/intersection/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/intersection/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |<img src="two_views/intersection/mosaic_REW_sim.jpg" width="495" alt="image_2.jpeg">   |
+|park | <img src="two_views/park/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/park/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |<img src="two_views/park/mosaic_REW_sim.jpg" width="495" alt="image_2.jpeg">   |
+|railtracks | <img src="two_views/railtracks/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/railtracks/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |<img src="two_views/railtracks/mosaic_REW_sim.jpg" width="495" alt="image_2.jpeg">   |
+|worktable | <img src="two_views/worktable/mosaic_global.jpg" width="494" alt="image_1.jpeg">  | <img src="two_views/worktable/mosaic_REW.jpg" width="495" alt="image_2.jpeg">   |<img src="two_views/worktable/mosaic_REW_sim.jpg" width="495" alt="image_2.jpeg">   |
 
 ## References
 

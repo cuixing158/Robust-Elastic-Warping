@@ -168,14 +168,14 @@ classdef RewWarp
             arguments
                 obj
                 img2 {mustBeNumeric}
-                meshImg2_U (:,:) double% 经global homography转换后对应的图像2网格横坐标
-                meshImg2_V (:,:) double% 经global homography转换后对应的图像2网格纵坐标
-                meshPano_U (:,:) double% 经global homography转换后对应的全景图像网格横坐标
-                meshPano_V (:,:) double% 经global homography转换后对应的全景图像网格纵坐标
+                meshImg2_U (:,:) double% 经global homography/similarity转换后对应的图像2网格横坐标
+                meshImg2_V (:,:) double% 经global homography/similarity转换后对应的图像2网格纵坐标
+                meshPano_U (:,:) double% 经global homography/similarity转换后对应的全景图像网格横坐标
+                meshPano_V (:,:) double% 经global homography/similarity转换后对应的全景图像网格纵坐标
                 offset_x (1,1) double % meshImg2_U(1)对应meshPano_U中的横向偏置，即x横坐标
                 offset_y (1,1) double % meshImg2_V(1)对应meshPano_V中的纵向偏置，即y纵坐标
-                overlapLimitsU (1,2) double% 经global homography转换后对应的overlap图像网格横坐标范围,形如[umin,umax]
-                overlapLimitsV (1,2) double% 经global homography转换后对应的overlap图像网格纵坐标范围,形如[vmin,vmax]
+                overlapLimitsU (1,2) double% 经global homography/similarity转换后对应的overlap图像网格横坐标范围,形如[umin,umax]
+                overlapLimitsV (1,2) double% 经global homography/similarity转换后对应的overlap图像网格纵坐标范围,形如[vmin,vmax]
                 K_smooth (1,1) double = 5 % 光滑程度阈值，数值越大，过渡越光滑
                 interval_Mesh (1,1) double = 10 % 插值网格采样点间隔，数值越大，采样点越稀疏，计算效率越高
             end
