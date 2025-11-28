@@ -3,7 +3,7 @@
 [![View Robust-Elastic-Image-Warping on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/182645-robust-elastic-image-warping)
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=cuixing158/Robust-Elastic-Image-Warping&file=RobustElasticWarping.mlx)
 
-This repository provides a **concise and readable implementation** of "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping" (Li et al., TMM 2018).Currently only stitching of two images is implemented,please see the example entry file [RobustElasticWarping.md](./RobustElasticWarping.md) or [click here :eyes:](https://viewer.mathworks.com/?viewer=live_code&url=https%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Fmlc-downloads%2Fdownloads%2Ff5f6ae8b-81ed-459c-9f72-780550c75edd%2F1764236701%2Ffiles%2FRobustElasticWarping.mlx&embed=web).
+This repository provides a **concise and readable implementation** of "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping"[^1] (Li et al., TMM 2018).Currently only stitching of two images is implemented,please see the example entry file [RobustElasticWarping.md](./RobustElasticWarping.md) or [click here :eyes:](https://viewer.mathworks.com/?viewer=live_code&url=https%3A%2F%2Fwww.mathworks.com%2Fmatlabcentral%2Fmlc-downloads%2Fdownloads%2Ff5f6ae8b-81ed-459c-9f72-780550c75edd%2F1764236701%2Ffiles%2FRobustElasticWarping.mlx&embed=web).
 
 :hugs: Happy Stitching!
 
@@ -24,4 +24,4 @@ This repository provides a **concise and readable implementation** of "Parallax-
 
 ## References
 
-[1] J. Li, Z. Wang, S. Lai, Y. Zhai and M. Zhang, "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping," in IEEE Transactions on Multimedia, vol. 20, no. 7, pp. 1672-1687, July 2018, doi: 10.1109/TMM.2017.2777461.
+[^1]: J. Li, Z. Wang, S. Lai, Y. Zhai and M. Zhang, "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping," in IEEE Transactions on Multimedia, vol. 20, no. 7, pp. 1672-1687, July 2018, doi: 10.1109/TMM.2017.2777461.
