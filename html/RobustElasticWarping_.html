@@ -1,0 +1,797 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<META http-equiv="Content-Type" content="text/html; charset=UTF-8">
+<!--
+This HTML was auto-generated from MATLAB code.
+To make changes, update the MATLAB code and republish this document.
+      -->
+<title>Parallax-Tolerant Image Stitching Based on Robust Elastic Warping</title>
+<meta name="generator" content="MATLAB 26.1">
+<link rel="schema.DC" href="http://purl.org/dc/elements/1.1/">
+<meta name="DC.date" content="2026-02-15">
+<meta name="DC.source" content="RobustElasticWarping_.m">
+<style type="text/css">
+html,body,div,span,applet,object,iframe,h1,h2,h3,h4,h5,h6,p,blockquote,pre,a,abbr,acronym,address,big,cite,code,del,dfn,em,font,img,ins,kbd,q,s,samp,small,strike,strong,tt,var,b,u,i,center,dl,dt,dd,ol,ul,li,fieldset,form,label,legend,table,caption,tbody,tfoot,thead,tr,th,td{margin:0;padding:0;border:0;outline:0;font-size:100%;vertical-align:baseline;background:transparent}body{line-height:1}ol,ul{list-style:none}blockquote,q{quotes:none}blockquote:before,blockquote:after,q:before,q:after{content:'';content:none}:focus{outine:0}ins{text-decoration:none}del{text-decoration:line-through}table{border-collapse:collapse;border-spacing:0}
+
+html { min-height:100%; margin-bottom:1px; }
+html body { height:100%; margin:0px; font-family:Arial, Helvetica, sans-serif; font-size:10px; color:#000; line-height:140%; background:#fff none; overflow-y:scroll; }
+html body td { vertical-align:top; text-align:left; }
+
+h1 { padding:0px; margin:0px 0px 25px; font-family:Arial, Helvetica, sans-serif; font-size:1.5em; color:#d55000; line-height:100%; font-weight:normal; }
+h2 { padding:0px; margin:0px 0px 8px; font-family:Arial, Helvetica, sans-serif; font-size:1.2em; color:#000; font-weight:bold; line-height:140%; border-bottom:1px solid #d6d4d4; display:block; }
+h3 { padding:0px; margin:0px 0px 5px; font-family:Arial, Helvetica, sans-serif; font-size:1.1em; color:#000; font-weight:bold; line-height:140%; }
+
+a { color:#005fce; text-decoration:none; }
+a:hover { color:#005fce; text-decoration:underline; }
+a:visited { color:#004aa0; text-decoration:none; }
+
+p { padding:0px; margin:0px 0px 20px; }
+img { padding:0px; margin:0px 0px 20px; border:none; }
+p img, pre img, tt img, li img, h1 img, h2 img { margin-bottom:0px; }
+
+ul { padding:0px; margin:0px 0px 20px 23px; list-style:square; }
+ul li { padding:0px; margin:0px 0px 7px 0px; }
+ul li ul { padding:5px 0px 0px; margin:0px 0px 7px 23px; }
+ul li ol li { list-style:decimal; }
+ol { padding:0px; margin:0px 0px 20px 0px; list-style:decimal; }
+ol li { padding:0px; margin:0px 0px 7px 23px; list-style-type:decimal; }
+ol li ol { padding:5px 0px 0px; margin:0px 0px 7px 0px; }
+ol li ol li { list-style-type:lower-alpha; }
+ol li ul { padding-top:7px; }
+ol li ul li { list-style:square; }
+
+.content { font-size:1.2em; line-height:140%; padding: 20px; }
+
+pre, code { font-size:12px; }
+tt { font-size: 1.2em; }
+pre { margin:0px 0px 20px; }
+pre.codeinput { padding:10px; border:1px solid #d3d3d3; background:#f7f7f7; }
+pre.codeoutput { padding:10px 11px; margin:0px 0px 20px; color:#4c4c4c; }
+pre.error { color:red; }
+
+@media print { pre.codeinput, pre.codeoutput { word-wrap:break-word; width:100%; } }
+
+span.keyword { color:#0000FF }
+span.comment { color:#228B22 }
+span.string { color:#A020F0 }
+span.untermstring { color:#B20000 }
+span.syscmd { color:#B28C00 }
+span.typesection { color:#A0522D }
+
+.footer { width:auto; padding:10px 0px; margin:25px 0px 0px; border-top:1px dotted #878787; font-size:0.8em; line-height:140%; font-style:italic; color:#878787; text-align:left; float:none; }
+.footer p { margin:0px; }
+.footer a { color:#878787; }
+.footer a:hover { color:#878787; text-decoration:underline; }
+.footer a:visited { color:#878787; }
+
+table th { padding:7px 5px; text-align:left; vertical-align:middle; border: 1px solid #d6d4d4; font-weight:bold; }
+table td { padding:7px 5px; text-align:left; vertical-align:top; border:1px solid #d6d4d4; }
+
+
+
+
+
+  </style>
+</head>
+<body>
+<div class="content">
+<h1>Parallax-Tolerant Image Stitching Based on Robust Elastic Warping</h1>
+<!--introduction-->
+<p>Author: 崔星星</p>
+<p>Date: 2025.11</p>
+<p>Email: &lt;mailto:cuixingxing150@gmail.com <a href="mailto:cuixingxing150@gmail.com">cuixingxing150@gmail.com</a>&gt;</p>
+<p>This example demonstrates the process and visualization of stitching two parallax-tolerant Images. The global homography/similarity estimation is separated from the REW‑TPS algorithm to reduce algorithmic coupling.</p>
+<!--/introduction-->
+<h2>Contents</h2>
+<div>
+<ul>
+<li>
+<a href="#1">1. Input Images and Basic Setup</a>
+</li>
+<li>
+<a href="#2">2. Detect and Match Features (SIFT)</a>
+</li>
+<li>
+<a href="#3">3. Estimate Global Projective Transform (homography)</a>
+</li>
+<li>
+<a href="#4">4. Create Panorama Reference and Warp By Global Homography</a>
+</li>
+<li>
+<a href="#5">5. Select Control Points and Fit Robust Elastic Warp (REW)</a>
+</li>
+<li>
+<a href="#6">6. Prepare Meshgrid Coordinates For Local Warping</a>
+</li>
+<li>
+<a href="#7">7. Blending To Create Final Panorama</a>
+</li>
+<li>
+<a href="#8">8. Visualization: heatmap and deformation grid</a>
+</li>
+<li>
+<a href="#9">9. Create Panorama Reference and Warp By Global Similarity Transformatioin</a>
+</li>
+<li>
+<a href="#10">10. Prepare Meshgrid Coordinates For Local Warping With Two Images</a>
+</li>
+<li>
+<a href="#13">References</a>
+</li>
+<li>
+<a href="#14">Support Functions (visual helpers)</a>
+</li>
+</ul>
+</div>
+<h2 id="1">1. Input Images and Basic Setup</h2>
+<p>Change paths here if you want to run other image pairs. Provided images are under `two_views/` in this repo.</p>
+<pre class="codeinput">img1 = imread(<span class="string">"./two_views/railtracks/01.jpg"</span>); <span class="comment">% reference / fixed image</span>
+img2 = imread(<span class="string">"./two_views/railtracks/02.jpg"</span>); <span class="comment">% moving image to be warped</span>
+
+<span class="comment">% Convert to grayscale for feature detection</span>
+gray1 = im2gray(img1);
+gray2 = im2gray(img2);
+</pre>
+<h2 id="2">2. Detect and Match Features (SIFT)</h2>
+<p>We detect a large set of SIFT keypoints and then sample them uniformly to avoid dense clustering in textured regions.</p>
+<pre class="codeinput">numPoints = 5000;
+
+<span class="comment">% SIFT detection. Tune `EdgeThreshold` / `ContrastThreshold` if few points</span>
+<span class="comment">% appear or too many noisy points appear.</span>
+points1 = detectSIFTFeatures(gray1, EdgeThreshold=500, ContrastThreshold=0);
+points2 = detectSIFTFeatures(gray2, EdgeThreshold=500, ContrastThreshold=0);
+
+<span class="comment">% Uniformly sample points (helper function exists in MATLAB File Exchange</span>
+<span class="comment">% or implemented in this repo). This reduces spatial bias.</span>
+points1 = selectUniform(points1, numPoints, size(gray1));
+points2 = selectUniform(points2, numPoints, size(gray2));
+
+<span class="comment">% Extract descriptors and match them</span>
+[features1, validPoints1] = extractFeatures(gray1, points1);
+[features2, validPoints2] = extractFeatures(gray2, points2);
+indexPairs = matchFeatures(features1, features2);
+
+<span class="comment">% Collect matched point coordinates</span>
+matchedPoints1 = validPoints1(indexPairs(:, 1), :);
+matchedPoints2 = validPoints2(indexPairs(:, 2), :);
+matchedPoints1 = matchedPoints1.Location;
+matchedPoints2 = matchedPoints2.Location;
+
+<span class="comment">% Visual check of matched points (montage view)</span>
+figure(<span class="string">'Name'</span>,<span class="string">'SIFT matches'</span>);
+showMatchedFeatures(img1, img2, matchedPoints1, matchedPoints2, <span class="string">"montage"</span>);
+title(<span class="string">"Points matched using SIFT features"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__01.png" alt=""> <h2 id="3">3. Estimate Global Projective Transform (homography)</h2>
+<p>We robustly estimate the fundamental matrix then derive a projective transform (homography) using the consistent inliers. This aligns the two images globally and provides a good initialization for the local REW step.</p>
+<pre class="codeinput">[~, ok] = estimateFundamentalMatrix(matchedPoints1, matchedPoints2, Method=<span class="string">"Norm8Point"</span>);
+matchedPoints_ok1 = matchedPoints1(ok, :);
+matchedPoints_ok2 = matchedPoints2(ok, :);
+
+<span class="comment">% Estimate a projective transform H such that points in img1 map to img2</span>
+tformH = estgeotform2d(matchedPoints_ok1, matchedPoints_ok2, <span class="string">"projective"</span>);
+</pre>
+<h2 id="4">4. Create Panorama Reference and Warp By Global Homography</h2>
+<p>Create an output reference frame that covers both images after warping.</p>
+<pre class="codeinput">tformInv = invert(tformH);
+xLimitsIn = [1, size(img2, 2)];
+yLimitsIn = [1, size(img2, 1)];
+[xLimitsOutInImg1, yLimitsOutInImg1] = outputLimits(tformInv, xLimitsIn, yLimitsIn);
+
+xWorldLimits = [min(xLimitsOutInImg1(1), 1), max(xLimitsOutInImg1(2), size(img1, 2))];
+yWorldLimits = [min(yLimitsOutInImg1(1), 1), max(yLimitsOutInImg1(2), size(img1, 1))];
+panoWidth = ceil(diff(xWorldLimits));
+panoHeight = ceil(diff(yWorldLimits));
+panoRef = imref2d([panoHeight, panoWidth], xWorldLimits, yWorldLimits);
+
+<span class="comment">% Warp both images into the panorama reference (global homography alignment)</span>
+warpImg1 = imwarp(img1, rigidtform2d(), outputView=panoRef);
+warpImgH2 = imwarp(img2, tformInv, outputView=panoRef);
+mask1 = imwarp(ones(size(img1, [1, 2]),<span class="string">'logical'</span>), rigidtform2d(), outputView=panoRef);
+mask2 = imwarp(ones(size(img2, [1, 2]),<span class="string">'logical'</span>), tformInv, outputView=panoRef);
+
+figure(<span class="string">'Name'</span>,<span class="string">'Global Homography Alignment'</span>);
+imshowpair(warpImg1, panoRef, warpImgH2, panoRef);
+title(<span class="string">"Alignment Using Global Homography"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__02.png" alt=""> <h2 id="5">5. Select Control Points and Fit Robust Elastic Warp (REW)</h2>
+<p>We find unique overlapping matched points, transform them into the same coordinate frame and use them as control points for REW.</p>
+<pre class="codeinput">[~, idx1] = unique(round(matchedPoints_ok1), <span class="string">'rows'</span>, <span class="string">'stable'</span>);
+[~, idx2] = unique(round(matchedPoints_ok2), <span class="string">'rows'</span>, <span class="string">'stable'</span>);
+idx = intersect(idx1, idx2);
+
+fixedPtsInImg1 = matchedPoints_ok1(idx, :);      <span class="comment">% fixed points (Img1 coords)</span>
+movingPtsInImg2 = matchedPoints_ok2(idx, :);     <span class="comment">% corresponding points in Img2</span>
+fixedPtsInImg2 = transformPointsForward(tformH, fixedPtsInImg1); <span class="comment">% Img2 world coords</span>
+
+<span class="comment">% Regularization parameter for REW (empirical). You may tune to control</span>
+<span class="comment">% smoothness vs. data fidelity. Here scaled by image area.</span>
+lambda = 0.001 * prod(size(img1, [1, 2]));
+
+<span class="comment">% Fit REW: this constructs the warp object (obj) and selects inliers.</span>
+<span class="comment">% The class `RewWarp` is part of this repo and implements the method from</span>
+<span class="comment">% the paper. Inspect `RewWarp.m` for details.</span>
+obj = RewWarp(movingPtsInImg2, fixedPtsInImg2, lambda)
+<span class="comment">% update matched points using 3 sigma removal</span>
+fixedPtsInImg1 = fixedPtsInImg1(obj.inlierIdx, :);
+movingPtsInImg2 = movingPtsInImg2(obj.inlierIdx, :);
+
+figure(<span class="string">'Name'</span>,<span class="string">'Inliers After REW Fit'</span>);
+showMatchedFeatures(img1, img2, fixedPtsInImg1, movingPtsInImg2, <span class="string">"montage"</span>);
+title(<span class="string">"Inlier matches after deduplication and 3-sigma removal"</span>)
+</pre>
+<pre class="codeoutput">Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  2.565509e-18. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.868775e-18. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.068048e-17. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.117501e-17. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.214570e-17. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.284345e-17. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.301699e-17. 
+Warning: Matrix is close to singular or badly scaled. Results may be inaccurate.
+RCOND =  3.318950e-17. 
+obj = 
+  RewWarp with properties:
+
+    movingPts: [165&times;2 double]
+     fixedPts: [165&times;2 double]
+           wx: [165&times;1 double]
+           wy: [165&times;1 double]
+           ax: 0.0010187
+           bx: 0.094527
+           cx: -282.64
+           ay: 0.0016731
+           by: 0.00068012
+           cy: -4.2547
+       lambda: 75398
+          gxy: [165&times;2 double]
+    inlierIdx: [165&times;1 double]
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__03.png" alt=""> <h2 id="6">6. Prepare Meshgrid Coordinates For Local Warping</h2>
+<p>The following maps coordinates between the panorama world and the moving image. We build a mesh to feed into the REW-based warping function.</p>
+<pre class="codeinput">u_im = xLimitsOutInImg1(1):xLimitsOutInImg1(2);
+v_im = yLimitsOutInImg1(1):yLimitsOutInImg1(2);
+[U, V] = meshgrid(u_im, v_im);
+[u_im_, v_im_] = transformPointsForward(tformH, U(:), V(:));
+
+offset_x = round(xLimitsOutInImg1(1) - panoRef.XWorldLimits(1));
+offset_y = round(yLimitsOutInImg1(1) - panoRef.YWorldLimits(1));
+
+<span class="comment">% Build full panorama grid in world coordinates and transform to image</span>
+[u, v] = meshgrid(xWorldLimits(1):xWorldLimits(2), yWorldLimits(1):yWorldLimits(2));
+u = imresize(u, [panoHeight, panoWidth]);
+v = imresize(v, [panoHeight, panoWidth]);
+[u_, v_] = transformPointsForward(tformH, u(:), v(:));
+
+<span class="comment">% Overlap region between images (used to limit where local warp applies within `warpImage` object-function)</span>
+[overlapLimitsU, overlapLimitsV] = outputLimits(tformH, [1, size(img1, 2)], [1, size(img1, 1)]);
+
+meshImg2_U = reshape(u_im_, size(U));
+meshImg2_V = reshape(v_im_, size(V));
+meshPano_U2 = reshape(u_, size(u));
+meshPano_V2 = reshape(v_, size(v));
+
+<span class="comment">% Execute the local REW warp (warpImage is provided with the REW implementation)</span>
+[warpImg2, gx, hy, eta] = warpImage(obj, img2, meshImg2_U, meshImg2_V, meshPano_U2, meshPano_V2, offset_x, offset_y, overlapLimitsU, overlapLimitsV);
+
+figure(<span class="string">'Name'</span>,<span class="string">'REW Warp Result'</span>);
+imshowpair(warpImg1, panoRef,warpImg2,panoRef);
+title(<span class="string">"Alignment Using REW"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__04.png" alt=""> <h2 id="7">7. Blending To Create Final Panorama</h2>
+<p>Create simple average blending in overlap region. For production, use <a href="https://github.com/cuixing158/multiBandBlender">multi-band</a> or seam-finding blends for better artifacts handling.</p>
+<pre class="codeinput">maskWarped = warpImg2 &gt; 0;
+maskWarped = maskWarped(:, :, 1);
+maskOverlap = mask1 &amp; maskWarped;
+pano = (im2double(warpImg1) + im2double(warpImg2)) ./ (im2double(maskOverlap) + 1);
+
+figure(<span class="string">'Name'</span>,<span class="string">'Final Panorama'</span>);
+imshow(pano, panoRef);
+title(<span class="string">"Stitching Using REW"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__05.png" alt=""> <h2 id="8">8. Visualization: heatmap and deformation grid</h2>
+<p>Visualize `eta` heatmap (shows where local deformation is strong)</p>
+<pre class="codeinput">CAMshow(im2uint8(pano), eta)
+title(<span class="string">"\eta heatmap"</span>)
+
+<span class="comment">% Visualize deformation grid on original and panorama coordinates</span>
+interval_Grid = 40; <span class="comment">% grid sampling (pixels) used for visualization</span>
+[gridXInImg2, gridYInImg2] = meshgrid(1:interval_Grid:size(img2, 2), 1:interval_Grid:size(img2, 1));
+[gridH, gridW] = size(gridXInImg2);
+[gridXInWorld, gridYInWorld] = transformPointsInverse(tformH, gridXInImg2(:), gridYInImg2(:));
+
+[I, J] = worldToSubscript(panoRef, gridXInWorld, gridYInWorld);
+deformXInImg2 = gridXInImg2(:) + diag(gx(I, J));
+deformYInImg2 = gridYInImg2(:) + diag(hy(I, J));
+[deformGridXInWorld, deformGridYInWorld] = transformPointsInverse(tformH, deformXInImg2(:), deformYInImg2(:));
+
+<span class="comment">% Show grid on the global homography fused image</span>
+globalHomoFuse = (im2double(warpImg1) + im2double(warpImgH2)) ./ (im2double(mask1 &amp; mask2) + 1);
+Gridshow(globalHomoFuse, gridXInWorld, gridYInWorld, gridH, gridW, panoRef);
+title(<span class="string">"Grid Show in Global Homography"</span>)
+
+<span class="comment">% Show grid after adding local TPS-like deformation from REW</span>
+Gridshow(pano, deformGridXInWorld, deformGridYInWorld, gridH, gridW, panoRef);
+title(<span class="string">"Grid Show: Global Homography + Local TPS Warp"</span>)
+<span class="comment">% Show deformation field overlayed on img2</span>
+Gridshow(img2, gridXInImg2, gridYInImg2, gridH, gridW, imref2d(size(img2)));
+hold <span class="string">on</span>;
+quiver(gridXInImg2(:),gridYInImg2(:),diag(gx(I,J)),diag(hy(I,J)),<span class="string">'-r'</span>)
+title(<span class="string">"Grid and Deformation Field in Img2 (deformation vectors)"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__06.png" alt=""> <img vspace="5" hspace="5" src="RobustElasticWarping__07.png" alt=""> <img vspace="5" hspace="5" src="RobustElasticWarping__08.png" alt=""> <h2 id="9">9. Create Panorama Reference and Warp By Global Similarity Transformatioin</h2>
+<p>Create an output reference frame that covers both images after warping.</p>
+<pre class="codeinput">
+<span class="comment">% Estimate a similarity transform S such that points in img1 map to img2</span>
+tformS = estgeotform2d(fixedPtsInImg1, movingPtsInImg2, <span class="string">"similarity"</span>);
+
+tformInv = invert(tformS);
+xLimitsIn = [1, size(img2, 2)];
+yLimitsIn = [1, size(img2, 1)];
+[xLimitsOutInImg1, yLimitsOutInImg1] = outputLimits(tformInv, xLimitsIn, yLimitsIn);
+
+xWorldLimits = [min(xLimitsOutInImg1(1), 1), max(xLimitsOutInImg1(2), size(img1, 2))];
+yWorldLimits = [min(yLimitsOutInImg1(1), 1), max(yLimitsOutInImg1(2), size(img1, 1))];
+panoWidth = ceil(diff(xWorldLimits));
+panoHeight = ceil(diff(yWorldLimits));
+panoRef = imref2d([panoHeight, panoWidth], xWorldLimits, yWorldLimits);
+
+<span class="comment">% Warp both images into the panorama reference (global similarity alignment)</span>
+warpImg1 = imwarp(img1, rigidtform2d(), outputView=panoRef);
+warpImg2 = imwarp(img2, tformInv, outputView=panoRef);
+
+figure(<span class="string">'Name'</span>,<span class="string">'Global Similarity Alignment'</span>);
+imshowpair(warpImg1, panoRef, warpImg2, panoRef);
+title(<span class="string">"Alignment Using Global Similarity"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__09.png" alt=""> <h2 id="10">10. Prepare Meshgrid Coordinates For Local Warping With Two Images</h2>
+<p>The following maps coordinates between the panorama world and the moving image(image2) and reference image(image1). We build a mesh to feed into the REW-based warping function.</p>
+<pre class="codeinput">u_im = xLimitsOutInImg1(1):xLimitsOutInImg1(2);
+v_im = yLimitsOutInImg1(1):yLimitsOutInImg1(2);
+[U, V] = meshgrid(u_im, v_im);
+[u_im_, v_im_] = transformPointsForward(tformS, U(:), V(:));
+
+offset_x = round(xLimitsOutInImg1(1) - panoRef.XWorldLimits(1));
+offset_y = round(yLimitsOutInImg1(1) - panoRef.YWorldLimits(1));
+
+<span class="comment">% Build full panorama grid in world coordinates for homography and similarity</span>
+[u, v] = meshgrid(xWorldLimits(1):xWorldLimits(2), yWorldLimits(1):yWorldLimits(2));
+u = imresize(u, [panoHeight, panoWidth]);
+v = imresize(v, [panoHeight, panoWidth]);
+[uH_, vH_] = transformPointsForward(tformH, u(:), v(:));
+[uS_, vS_] = transformPointsForward(tformS, u(:), v(:));
+</pre>
+<p>To remove the projection distortion from image 2 to image 1, and combined with a global similarity transform, decompose this into two separate homography transformations for the two images,the transformation matrices are <img src="RobustElasticWarping__eq07281104035487576237.png" alt="$H_p$">,$H_q$</p>
+<p>As the paper[1] states, we combine the homography and a similarity transformation using the techniques proposed in ANAP; i.e., <img src="RobustElasticWarping__eq01695918494795982816.png" alt="$H_q =\mu_h H+\mu_s S$"></p>
+<pre class="codeinput">mu_S = uS_./size(img2, 2);
+mu_S(mu_S &lt; 0) = 0;
+mu_S(mu_S &gt; 1) = 1;
+mu_H = 1 - mu_S;
+u_ = mu_H .* uH_ + mu_S .* uS_;
+v_ = mu_H .* vH_ + mu_S .* vS_;
+</pre>
+<p>Now we apply <img src="RobustElasticWarping__eq07281104035487576237.png" alt="$H_p$"> for reference image(image1), <img src="RobustElasticWarping__eq14580689026671044172.png" alt="$H_p =H_q H^{-1}$">,Note that the built-in function <a href="https://www.mathworks.com/help/images/ref/affinetform2d.transformpointsinverse.html"><tt>transformPointsInverse</tt></a> here performs the coordinate transformation using the inverse of the homography matrix <img src="RobustElasticWarping__eq07281104035487576237.png" alt="$H_p$">, and <tt>(u_, v_)</tt> are the coordinates after applying <img src="RobustElasticWarping__eq04015062336928758854.png" alt="$H_q$">.</p>
+<pre class="codeinput">
+<span class="comment">% Compute the transformation for the reference image(image1)</span>
+[uInImg1,vInImg1] = transformPointsInverse(tformH,u_,v_);
+
+<span class="comment">% Overlap region between images (used to limit where local warp applies within `warpImage` object-function)</span>
+[overlapLimitsU, overlapLimitsV] = outputLimits(tformS, [1, size(img1, 2)], [1, size(img1, 1)]);
+
+meshImg2_U = reshape(u_im_, size(U));
+meshImg2_V = reshape(v_im_, size(V));
+meshPano_U2 = reshape(u_, size(u));
+meshPano_V2 = reshape(v_, size(v));
+meshPano_U1 = reshape(uInImg1,size(u));
+meshPano_V1 = reshape(vInImg1,size(v));
+
+<span class="comment">% Execute the local REW warp (`warpImage` is provided with the REW implementation)</span>
+[warpImg2, gx, hy, eta] = warpImage(obj, img2, meshImg2_U, meshImg2_V, meshPano_U2, meshPano_V2, offset_x, offset_y, overlapLimitsU, overlapLimitsV);
+
+<span class="comment">% Deformation image1</span>
+warpImg1 = imageInterp(img1,meshPano_U1,meshPano_V1);
+
+<span class="comment">% visualize</span>
+figure(<span class="string">'Name'</span>,<span class="string">'REW Warp Result'</span>);
+imshowpair(warpImg1,panoRef, warpImg2,panoRef);
+title(<span class="string">"Alignment Using REW With Similarity"</span>)
+<span class="comment">% final panorama</span>
+mask1 = imageInterp(ones(size(img1,[1,2])),meshPano_U1,meshPano_V1);
+maskWarped = warpImg2 &gt; 0;
+mask2 = maskWarped(:, :, 1);
+maskOverlap = mask1 &amp; mask2;
+pano = (im2double(warpImg1) + im2double(warpImg2)) ./ (im2double(maskOverlap) + 1);
+
+figure(<span class="string">'Name'</span>,<span class="string">'Final Panorama'</span>);
+imshow(pano, panoRef);
+title(<span class="string">"Stitching Using REW with Similarity"</span>)
+</pre>
+<img vspace="5" hspace="5" src="RobustElasticWarping__10.png" alt=""> <img vspace="5" hspace="5" src="RobustElasticWarping__11.png" alt=""> <h2 id="13">References</h2>
+<p>[1] J. Li, Z. Wang, S. Lai, Y. Zhai and M. Zhang, "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping," IEEE Transactions on Multimedia, vol. 20, no. 7, pp. 1672-1687, July 2018.</p>
+<p>[2] <a href="https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html#bvnhvs8">Matrix Representation of Geometric Transformations - MATLAB &amp; Simulink</a>
+</p>
+<h2 id="14">Support Functions (visual helpers)</h2>
+<p>These small helper functions display grids and heatmaps. They are kept at the end of the file for convenience so this script runs as a single file demo.</p>
+<pre class="codeinput">
+<span class="keyword">function</span> Gridshow(im, x, y, gridH, gridW, panoRef)
+    figure; imshow(im, panoRef); hold <span class="string">on</span>; axis <span class="string">on</span>;
+    gridXInImg1 = reshape(x, [gridH, gridW]);
+    gridYInImg1 = reshape(y, [gridH, gridW]);
+    mesh(gridXInImg1, gridYInImg1, zeros(gridH, gridW), <span class="string">'FaceAlpha'</span>, 0, <span class="string">'EdgeAlpha'</span>, 0.85)
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> CAMshow(im, CAM, coff)
+    <span class="keyword">arguments</span>
+        im <span class="typesection">{mustBeNumeric}</span>
+        CAM <span class="typesection">(:, :) double</span>
+        coff <span class="typesection">(1, 1) double </span>= 2
+    <span class="keyword">end</span>
+
+    imSize = size(im);
+    CAM = imresize(CAM, imSize(1:2));
+    CAM = normalizeImage(CAM);
+    cmap = jet(255) .* linspace(0, 1, 255)';
+    CAM = ind2rgb(uint8(CAM * 255), cmap) * 255;
+
+    combinedImage = coff * double(rgb2gray(im)) + CAM;
+    combinedImage = im2uint8(normalizeImage(combinedImage));
+    figure; imshow(combinedImage);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> N = normalizeImage(I)
+    minimum = min(I(:));
+    maximum = max(I(:));
+    N = (I - minimum) / (maximum - minimum);
+<span class="keyword">end</span>
+
+<span class="keyword">function</span> outImage = imageInterp(inImage,mapX,mapY)
+outImage = images.internal.interp2d(inImage,mapX,mapY,<span class="string">'linear'</span>,0,false);
+<span class="keyword">end</span>
+</pre>
+<p class="footer">
+<br>
+<a href="https://www.mathworks.com/products/matlab/">Published with MATLAB&reg; R2026a</a>
+<br>
+</p>
+</div>
+<!--
+##### SOURCE BEGIN #####
+%% Parallax-Tolerant Image Stitching Based on Robust Elastic Warping
+% Author: 崔星星
+% 
+% Date: 2025.11 
+% 
+% Email: <mailto:cuixingxing150@gmail.com cuixingxing150@gmail.com>
+% 
+% This example demonstrates the process and visualization of stitching two parallax-tolerant 
+% Images. The global homography/similarity estimation is separated from the REW‑TPS 
+% algorithm to reduce algorithmic coupling.
+%% 1. Input Images and Basic Setup 
+% Change paths here if you want to run other image pairs. Provided images are 
+% under `two_views/` in this repo.
+
+img1 = imread("./two_views/railtracks/01.jpg"); % reference / fixed image
+img2 = imread("./two_views/railtracks/02.jpg"); % moving image to be warped
+
+% Convert to grayscale for feature detection 
+gray1 = im2gray(img1);
+gray2 = im2gray(img2);
+%% 2. Detect and Match Features (SIFT)
+% We detect a large set of SIFT keypoints and then sample them uniformly to 
+% avoid dense clustering in textured regions. 
+
+numPoints = 5000;
+
+% SIFT detection. Tune `EdgeThreshold` / `ContrastThreshold` if few points
+% appear or too many noisy points appear.
+points1 = detectSIFTFeatures(gray1, EdgeThreshold=500, ContrastThreshold=0);
+points2 = detectSIFTFeatures(gray2, EdgeThreshold=500, ContrastThreshold=0);
+
+% Uniformly sample points (helper function exists in MATLAB File Exchange
+% or implemented in this repo). This reduces spatial bias.
+points1 = selectUniform(points1, numPoints, size(gray1));
+points2 = selectUniform(points2, numPoints, size(gray2));
+
+% Extract descriptors and match them
+[features1, validPoints1] = extractFeatures(gray1, points1);
+[features2, validPoints2] = extractFeatures(gray2, points2);
+indexPairs = matchFeatures(features1, features2);
+
+% Collect matched point coordinates
+matchedPoints1 = validPoints1(indexPairs(:, 1), :);
+matchedPoints2 = validPoints2(indexPairs(:, 2), :);
+matchedPoints1 = matchedPoints1.Location;
+matchedPoints2 = matchedPoints2.Location;
+
+% Visual check of matched points (montage view)
+figure('Name','SIFT matches');
+showMatchedFeatures(img1, img2, matchedPoints1, matchedPoints2, "montage");
+title("Points matched using SIFT features")
+%% 3. Estimate Global Projective Transform (homography) 
+% We robustly estimate the fundamental matrix then derive a projective transform 
+% (homography) using the consistent inliers. This aligns the two images globally 
+% and provides a good initialization for the local REW step.
+
+[~, ok] = estimateFundamentalMatrix(matchedPoints1, matchedPoints2, Method="Norm8Point");
+matchedPoints_ok1 = matchedPoints1(ok, :);
+matchedPoints_ok2 = matchedPoints2(ok, :);
+
+% Estimate a projective transform H such that points in img1 map to img2
+tformH = estgeotform2d(matchedPoints_ok1, matchedPoints_ok2, "projective");
+%% 4. Create Panorama Reference and Warp By Global Homography 
+% Create an output reference frame that covers both images after warping.
+
+tformInv = invert(tformH);
+xLimitsIn = [1, size(img2, 2)];
+yLimitsIn = [1, size(img2, 1)];
+[xLimitsOutInImg1, yLimitsOutInImg1] = outputLimits(tformInv, xLimitsIn, yLimitsIn);
+
+xWorldLimits = [min(xLimitsOutInImg1(1), 1), max(xLimitsOutInImg1(2), size(img1, 2))];
+yWorldLimits = [min(yLimitsOutInImg1(1), 1), max(yLimitsOutInImg1(2), size(img1, 1))];
+panoWidth = ceil(diff(xWorldLimits));
+panoHeight = ceil(diff(yWorldLimits));
+panoRef = imref2d([panoHeight, panoWidth], xWorldLimits, yWorldLimits);
+
+% Warp both images into the panorama reference (global homography alignment)
+warpImg1 = imwarp(img1, rigidtform2d(), outputView=panoRef);
+warpImgH2 = imwarp(img2, tformInv, outputView=panoRef);
+mask1 = imwarp(ones(size(img1, [1, 2]),'logical'), rigidtform2d(), outputView=panoRef);
+mask2 = imwarp(ones(size(img2, [1, 2]),'logical'), tformInv, outputView=panoRef);
+
+figure('Name','Global Homography Alignment');
+imshowpair(warpImg1, panoRef, warpImgH2, panoRef);
+title("Alignment Using Global Homography")
+%% 5. Select Control Points and Fit Robust Elastic Warp (REW)
+% We find unique overlapping matched points, transform them into the same coordinate 
+% frame and use them as control points for REW.
+
+[~, idx1] = unique(round(matchedPoints_ok1), 'rows', 'stable');
+[~, idx2] = unique(round(matchedPoints_ok2), 'rows', 'stable');
+idx = intersect(idx1, idx2);
+
+fixedPtsInImg1 = matchedPoints_ok1(idx, :);      % fixed points (Img1 coords)
+movingPtsInImg2 = matchedPoints_ok2(idx, :);     % corresponding points in Img2
+fixedPtsInImg2 = transformPointsForward(tformH, fixedPtsInImg1); % Img2 world coords
+
+% Regularization parameter for REW (empirical). You may tune to control
+% smoothness vs. data fidelity. Here scaled by image area.
+lambda = 0.001 * prod(size(img1, [1, 2]));
+
+% Fit REW: this constructs the warp object (obj) and selects inliers.
+% The class `RewWarp` is part of this repo and implements the method from
+% the paper. Inspect `RewWarp.m` for details.
+obj = RewWarp(movingPtsInImg2, fixedPtsInImg2, lambda)
+% update matched points using 3 sigma removal
+fixedPtsInImg1 = fixedPtsInImg1(obj.inlierIdx, :);
+movingPtsInImg2 = movingPtsInImg2(obj.inlierIdx, :);
+
+figure('Name','Inliers After REW Fit');
+showMatchedFeatures(img1, img2, fixedPtsInImg1, movingPtsInImg2, "montage");
+title("Inlier matches after deduplication and 3-sigma removal")
+%% 6. Prepare Meshgrid Coordinates For Local Warping
+% The following maps coordinates between the panorama world and the moving image. 
+% We build a mesh to feed into the REW-based warping function.
+
+u_im = xLimitsOutInImg1(1):xLimitsOutInImg1(2);
+v_im = yLimitsOutInImg1(1):yLimitsOutInImg1(2);
+[U, V] = meshgrid(u_im, v_im);
+[u_im_, v_im_] = transformPointsForward(tformH, U(:), V(:));
+
+offset_x = round(xLimitsOutInImg1(1) - panoRef.XWorldLimits(1));
+offset_y = round(yLimitsOutInImg1(1) - panoRef.YWorldLimits(1));
+
+% Build full panorama grid in world coordinates and transform to image
+[u, v] = meshgrid(xWorldLimits(1):xWorldLimits(2), yWorldLimits(1):yWorldLimits(2));
+u = imresize(u, [panoHeight, panoWidth]);
+v = imresize(v, [panoHeight, panoWidth]);
+[u_, v_] = transformPointsForward(tformH, u(:), v(:));
+
+% Overlap region between images (used to limit where local warp applies within `warpImage` object-function)
+[overlapLimitsU, overlapLimitsV] = outputLimits(tformH, [1, size(img1, 2)], [1, size(img1, 1)]);
+
+meshImg2_U = reshape(u_im_, size(U));
+meshImg2_V = reshape(v_im_, size(V));
+meshPano_U2 = reshape(u_, size(u));
+meshPano_V2 = reshape(v_, size(v));
+
+% Execute the local REW warp (warpImage is provided with the REW implementation)
+[warpImg2, gx, hy, eta] = warpImage(obj, img2, meshImg2_U, meshImg2_V, meshPano_U2, meshPano_V2, offset_x, offset_y, overlapLimitsU, overlapLimitsV);
+
+figure('Name','REW Warp Result');
+imshowpair(warpImg1, panoRef,warpImg2,panoRef);
+title("Alignment Using REW")
+%% 7. Blending To Create Final Panorama
+% Create simple average blending in overlap region. For production, use <https://github.com/cuixing158/multiBandBlender 
+% multi-band> or seam-finding blends for better artifacts handling.
+
+maskWarped = warpImg2 > 0;
+maskWarped = maskWarped(:, :, 1);
+maskOverlap = mask1 & maskWarped;
+pano = (im2double(warpImg1) + im2double(warpImg2)) ./ (im2double(maskOverlap) + 1);
+
+figure('Name','Final Panorama');
+imshow(pano, panoRef);
+title("Stitching Using REW")
+%% 8. Visualization: heatmap and deformation grid 
+% Visualize `eta` heatmap (shows where local deformation is strong)
+
+CAMshow(im2uint8(pano), eta)
+title("\eta heatmap")
+
+% Visualize deformation grid on original and panorama coordinates
+interval_Grid = 40; % grid sampling (pixels) used for visualization
+[gridXInImg2, gridYInImg2] = meshgrid(1:interval_Grid:size(img2, 2), 1:interval_Grid:size(img2, 1));
+[gridH, gridW] = size(gridXInImg2);
+[gridXInWorld, gridYInWorld] = transformPointsInverse(tformH, gridXInImg2(:), gridYInImg2(:));
+
+[I, J] = worldToSubscript(panoRef, gridXInWorld, gridYInWorld);
+deformXInImg2 = gridXInImg2(:) + diag(gx(I, J));
+deformYInImg2 = gridYInImg2(:) + diag(hy(I, J));
+[deformGridXInWorld, deformGridYInWorld] = transformPointsInverse(tformH, deformXInImg2(:), deformYInImg2(:));
+
+% Show grid on the global homography fused image
+globalHomoFuse = (im2double(warpImg1) + im2double(warpImgH2)) ./ (im2double(mask1 & mask2) + 1);
+Gridshow(globalHomoFuse, gridXInWorld, gridYInWorld, gridH, gridW, panoRef);
+title("Grid Show in Global Homography")
+
+% Show grid after adding local TPS-like deformation from REW
+Gridshow(pano, deformGridXInWorld, deformGridYInWorld, gridH, gridW, panoRef);
+title("Grid Show: Global Homography + Local TPS Warp")
+% Show deformation field overlayed on img2
+Gridshow(img2, gridXInImg2, gridYInImg2, gridH, gridW, imref2d(size(img2)));
+hold on;
+quiver(gridXInImg2(:),gridYInImg2(:),diag(gx(I,J)),diag(hy(I,J)),'-r')
+title("Grid and Deformation Field in Img2 (deformation vectors)")
+%% 9. Create Panorama Reference and Warp By Global Similarity Transformatioin 
+% Create an output reference frame that covers both images after warping.
+
+% Estimate a similarity transform S such that points in img1 map to img2
+tformS = estgeotform2d(fixedPtsInImg1, movingPtsInImg2, "similarity");
+
+tformInv = invert(tformS);
+xLimitsIn = [1, size(img2, 2)];
+yLimitsIn = [1, size(img2, 1)];
+[xLimitsOutInImg1, yLimitsOutInImg1] = outputLimits(tformInv, xLimitsIn, yLimitsIn);
+
+xWorldLimits = [min(xLimitsOutInImg1(1), 1), max(xLimitsOutInImg1(2), size(img1, 2))];
+yWorldLimits = [min(yLimitsOutInImg1(1), 1), max(yLimitsOutInImg1(2), size(img1, 1))];
+panoWidth = ceil(diff(xWorldLimits));
+panoHeight = ceil(diff(yWorldLimits));
+panoRef = imref2d([panoHeight, panoWidth], xWorldLimits, yWorldLimits);
+
+% Warp both images into the panorama reference (global similarity alignment)
+warpImg1 = imwarp(img1, rigidtform2d(), outputView=panoRef);
+warpImg2 = imwarp(img2, tformInv, outputView=panoRef);
+
+figure('Name','Global Similarity Alignment');
+imshowpair(warpImg1, panoRef, warpImg2, panoRef);
+title("Alignment Using Global Similarity")
+%% 10. Prepare Meshgrid Coordinates For Local Warping With Two Images
+% The following maps coordinates between the panorama world and the moving image(image2) 
+% and reference image(image1). We build a mesh to feed into the REW-based warping 
+% function.
+
+u_im = xLimitsOutInImg1(1):xLimitsOutInImg1(2);
+v_im = yLimitsOutInImg1(1):yLimitsOutInImg1(2);
+[U, V] = meshgrid(u_im, v_im);
+[u_im_, v_im_] = transformPointsForward(tformS, U(:), V(:));
+
+offset_x = round(xLimitsOutInImg1(1) - panoRef.XWorldLimits(1));
+offset_y = round(yLimitsOutInImg1(1) - panoRef.YWorldLimits(1));
+
+% Build full panorama grid in world coordinates for homography and similarity
+[u, v] = meshgrid(xWorldLimits(1):xWorldLimits(2), yWorldLimits(1):yWorldLimits(2));
+u = imresize(u, [panoHeight, panoWidth]);
+v = imresize(v, [panoHeight, panoWidth]);
+[uH_, vH_] = transformPointsForward(tformH, u(:), v(:));
+[uS_, vS_] = transformPointsForward(tformS, u(:), v(:));
+%% 
+% To remove the projection distortion from image 2 to image 1, and  combined 
+% with a global similarity transform, decompose this into two separate homography 
+% transformations for the two images,the transformation matrices are $H_p$,$H_q$
+% 
+% As the paper[1] states, we combine the homography and a similarity transformation 
+% using the techniques proposed in ANAP; i.e., $H_q =\mu_h H+\mu_s S$
+
+mu_S = uS_./size(img2, 2);
+mu_S(mu_S < 0) = 0;
+mu_S(mu_S > 1) = 1;
+mu_H = 1 - mu_S;
+u_ = mu_H .* uH_ + mu_S .* uS_;
+v_ = mu_H .* vH_ + mu_S .* vS_;
+%% 
+% Now we apply $H_p$ for reference image(image1), $H_p =H_q H^{-1}$,Note that 
+% the built-in function <https://www.mathworks.com/help/images/ref/affinetform2d.transformpointsinverse.html 
+% |transformPointsInverse|> here performs the coordinate transformation using 
+% the inverse of the homography matrix $H_p$, and |(u_, v_)| are the coordinates 
+% after applying $H_q$.
+
+% Compute the transformation for the reference image(image1)
+[uInImg1,vInImg1] = transformPointsInverse(tformH,u_,v_);
+
+% Overlap region between images (used to limit where local warp applies within `warpImage` object-function)
+[overlapLimitsU, overlapLimitsV] = outputLimits(tformS, [1, size(img1, 2)], [1, size(img1, 1)]);
+
+meshImg2_U = reshape(u_im_, size(U));
+meshImg2_V = reshape(v_im_, size(V));
+meshPano_U2 = reshape(u_, size(u));
+meshPano_V2 = reshape(v_, size(v));
+meshPano_U1 = reshape(uInImg1,size(u));
+meshPano_V1 = reshape(vInImg1,size(v));
+
+% Execute the local REW warp (`warpImage` is provided with the REW implementation)
+[warpImg2, gx, hy, eta] = warpImage(obj, img2, meshImg2_U, meshImg2_V, meshPano_U2, meshPano_V2, offset_x, offset_y, overlapLimitsU, overlapLimitsV);
+
+% Deformation image1
+warpImg1 = imageInterp(img1,meshPano_U1,meshPano_V1);
+
+% visualize
+figure('Name','REW Warp Result');
+imshowpair(warpImg1,panoRef, warpImg2,panoRef);
+title("Alignment Using REW With Similarity")
+% final panorama
+mask1 = imageInterp(ones(size(img1,[1,2])),meshPano_U1,meshPano_V1);
+maskWarped = warpImg2 > 0;
+mask2 = maskWarped(:, :, 1);
+maskOverlap = mask1 & mask2;
+pano = (im2double(warpImg1) + im2double(warpImg2)) ./ (im2double(maskOverlap) + 1);
+
+figure('Name','Final Panorama');
+imshow(pano, panoRef);
+title("Stitching Using REW with Similarity")
+%% References
+% [1] J. Li, Z. Wang, S. Lai, Y. Zhai and M. Zhang, "Parallax-Tolerant Image 
+% Stitching Based on Robust Elastic Warping," IEEE Transactions on Multimedia, 
+% vol. 20, no. 7, pp. 1672-1687, July 2018.
+% 
+% [2] <https://www.mathworks.com/help/images/matrix-representation-of-geometric-transformations.html#bvnhvs8 
+% Matrix Representation of Geometric Transformations - MATLAB & Simulink>
+%% Support Functions (visual helpers) 
+% These small helper functions display grids and heatmaps. They are kept at 
+% the end of the file for convenience so this script runs as a single file demo. 
+
+function Gridshow(im, x, y, gridH, gridW, panoRef)
+    figure; imshow(im, panoRef); hold on; axis on;
+    gridXInImg1 = reshape(x, [gridH, gridW]);
+    gridYInImg1 = reshape(y, [gridH, gridW]);
+    mesh(gridXInImg1, gridYInImg1, zeros(gridH, gridW), 'FaceAlpha', 0, 'EdgeAlpha', 0.85)
+end
+
+function CAMshow(im, CAM, coff)
+    arguments
+        im {mustBeNumeric}
+        CAM (:, :) double
+        coff (1, 1) double = 2
+    end
+
+    imSize = size(im);
+    CAM = imresize(CAM, imSize(1:2));
+    CAM = normalizeImage(CAM);
+    cmap = jet(255) .* linspace(0, 1, 255)';
+    CAM = ind2rgb(uint8(CAM * 255), cmap) * 255;
+
+    combinedImage = coff * double(rgb2gray(im)) + CAM;
+    combinedImage = im2uint8(normalizeImage(combinedImage));
+    figure; imshow(combinedImage);
+end
+
+function N = normalizeImage(I)
+    minimum = min(I(:));
+    maximum = max(I(:));
+    N = (I - minimum) / (maximum - minimum);
+end
+
+function outImage = imageInterp(inImage,mapX,mapY)
+outImage = images.internal.interp2d(inImage,mapX,mapY,'linear',0,false);
+end
+##### SOURCE END #####
+-->
+</body>
+</html>
