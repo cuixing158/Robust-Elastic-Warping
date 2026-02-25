@@ -3,7 +3,7 @@
 [![View Robust-Elastic-Image-Warping on File Exchange](https://www.mathworks.com/matlabcentral/images/matlab-file-exchange.svg)](https://www.mathworks.com/matlabcentral/fileexchange/182645-robust-elastic-image-warping)
 [![Open in MATLAB Online](https://www.mathworks.com/images/responsive/global/open-in-matlab-online.svg)](https://matlab.mathworks.com/open/github/v1?repo=cuixing158/Robust-Elastic-Image-Warping&file=RobustElasticWarping.mlx)
 
-This repository provides a **concise and readable implementation** of "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping"[^1] (Li et al., TMM 2018).Currently only stitching of two images is implemented,please see the example entry file [RobustElasticWarping.md](./RobustElasticWarping.md) or [click here :eyes:](https://viewer.mathworks.com/addons/182645/1.0.0/files/RobustElasticWarping.mlx).
+This repository provides a **concise and readable implementation** of "Parallax-Tolerant Image Stitching Based on Robust Elastic Warping"[^1] (Li et al., TMM 2018).Currently only stitching of two images is implemented,please see the example entry file [RobustElasticWarping.md](./RobustElasticWarping.md) or [click here :eyes:](https://html-preview.github.io/?url=https://github.com/cuixing158/Robust-Elastic-Warping/blob/main/html/RobustElasticWarping_.html).
 
 :hugs: Happy Stitching!
 
